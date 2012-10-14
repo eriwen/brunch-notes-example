@@ -1,8 +1,7 @@
-application = require('application')
-module.exports = Backbone.Router.extend(
+app = require('application')
+module.exports = class Router extends Backbone.Router
   routes:
     '': 'home'
 
   home: ->
-    $('body').html application.homeView.render().el
-)
+    app.homeView.render()

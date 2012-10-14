@@ -4123,13 +4123,38 @@ a.label:hover, a.badge:hover {
   .nav-collapse.collapse {
     height: auto !important;
     overflow: visible !important; } }
-#home-view {
-  width: 480px;
-  margin: 0 auto; }
+html, body {
+  height: 100%; }
 
-h1 {
-  font: 0/0 a;
-  text-shadow: none;
-  color: transparent;
-  border-radius: 5px;
-  background-color: #91a2c0; }
+.fullheight {
+  height: 100%; }
+
+.fullwidth {
+  width: 100%; }
+
+body {
+  overflow: hidden; }
+  body > .container-fluid {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0; }
+
+#notes-list {
+  height: 100%; }
+  #notes-list > div {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0; }
+
+#note-editor {
+  border-left: 1px solid #cccccc;
+  height: 100%; }
+  #note-editor > div {
+    height: 100%; }
+  #note-editor #note-input {
+    height: 100%;
+    width: 100; }

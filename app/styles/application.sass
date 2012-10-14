@@ -1,1 +1,24 @@
-undefined
+@import "compass/layout/stretching"
+
+html, body
+  height: 100%
+.fullheight
+  height: 100%
+.fullwidth
+  width: 100%
+body
+  overflow: hidden
+  > .container-fluid
+    +stretch
+#notes-list
+  height: 100%
+  > div
+    +stretch
+#note-editor
+  border-left: 1px solid #ccc
+  height: 100%
+  > div
+    height: 100%
+  #note-input
+    height: 100%
+    width: 100%

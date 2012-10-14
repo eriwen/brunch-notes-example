@@ -74,10 +74,81 @@
   globals.require.brunch = true;
 })();
 
+window.require.define({"test/models/note": function(exports, require, module) {
+  var Note;
+
+  Note = require('models/note');
+
+  describe('Note', function() {
+    return beforeEach(function() {
+      return this.model = new Note();
+    });
+  });
+  
+}});
+
+window.require.define({"test/models/notes_test": function(exports, require, module) {
+  
+
+  
+}});
+
 window.require.define({"test/spec": function(exports, require, module) {
   
 
   
 }});
 
+window.require.define({"test/views/new_note_view": function(exports, require, module) {
+  var NewNoteView;
 
+  NewNoteView = require('views/new_note_view');
+
+  describe('NewNoteView', function() {
+    return beforeEach(function() {
+      return this.view = new NewNoteView();
+    });
+  });
+  
+}});
+
+window.require.define({"test/views/note_list_view": function(exports, require, module) {
+  var NoteListView;
+
+  NoteListView = require('views/note_list_view');
+
+  describe('NoteListView', function() {
+    return beforeEach(function() {
+      return this.view = new NoteListView();
+    });
+  });
+  
+}});
+
+window.require.define({"test/views/note_view": function(exports, require, module) {
+  var NoteView;
+
+  NoteView = require('views/note_view');
+
+  describe('NoteView', function() {
+    return beforeEach(function() {
+      return this.view = new NoteView();
+    });
+  });
+  
+}});
+
+window.require.define({"test/views/notepad_view": function(exports, require, module) {
+  var NotepadView;
+
+  NotepadView = require('views/notepad_view');
+
+  describe('NotepadView', function() {
+    return beforeEach(function() {
+      return this.view = new NotepadView();
+    });
+  });
+  
+}});
+
+window.require('test/models/notes_test');

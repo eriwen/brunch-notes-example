@@ -1,5 +1,8 @@
 Collection = require './collection'
-Notes = require 'models/notes'
+app = require 'application'
+Note = require 'models/note'
 
 module.exports = class Notes extends Collection
-  model: Notes
+  model: Note
+
+  initialize: =>

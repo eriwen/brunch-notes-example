@@ -79,14 +79,21 @@ window.require.define({"application": function(exports, require, module) {
 
   Application = {
     initialize: function() {
-      var HomeView, Router;
+      var HomeView, NewNoteView, NoteListView, NoteView, NotepadView, Notes, Router;
+      Notes = require('models/notes');
       HomeView = require('views/home_view');
+      NoteListView = require('views/note_list_view');
+      NotepadView = require('views/notepad_view');
+      NoteView = require('views/note_view');
+      NewNoteView = require('views/new_note_view');
       Router = require('lib/router');
+      this.notes = new Notes();
       this.homeView = new HomeView();
+      this.noteListView = new NoteListView();
+      this.notepadView = new NotepadView();
+      this.newNoteView = new NewNoteView();
       this.router = new Router();
-      if (typeof Object.freeze === 'function') {
-        return Object.freeze(this);
-      }
+      return typeof Object.freeze === "function" ? Object.freeze(Application) : void 0;
     }
   };
 
@@ -107,18 +114,31 @@ window.require.define({"initialize": function(exports, require, module) {
 }});
 
 window.require.define({"lib/router": function(exports, require, module) {
-  var application;
+  var Router, app,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  application = require('application');
+  app = require('application');
 
-  module.exports = Backbone.Router.extend({
-    routes: {
-      '': 'home'
-    },
-    home: function() {
-      return $('body').html(application.homeView.render().el);
+  module.exports = Router = (function(_super) {
+
+    __extends(Router, _super);
+
+    function Router() {
+      return Router.__super__.constructor.apply(this, arguments);
     }
-  });
+
+    Router.prototype.routes = {
+      '': 'home'
+    };
+
+    Router.prototype.home = function() {
+      return app.homeView.render();
+    };
+
+    return Router;
+
+  })(Backbone.Router);
   
 }});
 
@@ -134,17 +154,234 @@ window.require.define({"models/model": function(exports, require, module) {
   
 }});
 
+window.require.define({"models/note": function(exports, require, module) {
+  var Model, Note,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Model = require('./model');
+
+  module.exports = Note = (function(_super) {
+
+    __extends(Note, _super);
+
+    function Note() {
+      this.clear = __bind(this.clear, this);
+      return Note.__super__.constructor.apply(this, arguments);
+    }
+
+    Note.prototype.defaults = {
+      title: 'Click to edit',
+      content: '',
+      current: false
+    };
+
+    Note.prototype.clear = function() {
+      this.destroy();
+      return this.view.remove();
+    };
+
+    return Note;
+
+  })(Model);
+  
+}});
+
+window.require.define({"models/notes": function(exports, require, module) {
+  var Collection, Note, Notes, app,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Collection = require('./collection');
+
+  app = require('application');
+
+  Note = require('models/note');
+
+  module.exports = Notes = (function(_super) {
+
+    __extends(Notes, _super);
+
+    function Notes() {
+      this.initialize = __bind(this.initialize, this);
+      return Notes.__super__.constructor.apply(this, arguments);
+    }
+
+    Notes.prototype.model = Note;
+
+    Notes.prototype.initialize = function() {};
+
+    return Notes;
+
+  })(Collection);
+  
+}});
+
 window.require.define({"views/home_view": function(exports, require, module) {
-  var View, template;
+  var HomeView, View, app, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   View = require('./view');
 
+  app = require('application');
+
   template = require('./templates/home');
 
-  module.exports = View.extend({
-    id: 'home-view',
-    template: template
-  });
+  module.exports = HomeView = (function(_super) {
+
+    __extends(HomeView, _super);
+
+    function HomeView() {
+      return HomeView.__super__.constructor.apply(this, arguments);
+    }
+
+    HomeView.prototype.el = '#page-container';
+
+    HomeView.prototype.template = template;
+
+    HomeView.prototype.afterRender = function() {
+      return this.$el.find('#note-editor').append(app.notepadView.render().el);
+    };
+
+    return HomeView;
+
+  })(View);
+  
+}});
+
+window.require.define({"views/new_note_view": function(exports, require, module) {
+  var NewNoteView, View, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('./view');
+
+  template = require('./templates/new_note');
+
+  module.exports = NewNoteView = (function(_super) {
+
+    __extends(NewNoteView, _super);
+
+    function NewNoteView() {
+      return NewNoteView.__super__.constructor.apply(this, arguments);
+    }
+
+    NewNoteView.prototype.template = template;
+
+    return NewNoteView;
+
+  })(View);
+  
+}});
+
+window.require.define({"views/note_list_view": function(exports, require, module) {
+  var NoteListView, View, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('./view');
+
+  template = require('./templates/note_list');
+
+  module.exports = NoteListView = (function(_super) {
+
+    __extends(NoteListView, _super);
+
+    function NoteListView() {
+      return NoteListView.__super__.constructor.apply(this, arguments);
+    }
+
+    NoteListView.prototype.template = template;
+
+    return NoteListView;
+
+  })(View);
+  
+}});
+
+window.require.define({"views/note_view": function(exports, require, module) {
+  var NoteView, View, template,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('./view');
+
+  template = require('./templates/note');
+
+  module.exports = NoteView = (function(_super) {
+
+    __extends(NoteView, _super);
+
+    function NoteView() {
+      return NoteView.__super__.constructor.apply(this, arguments);
+    }
+
+    NoteView.prototype.template = template;
+
+    return NoteView;
+
+  })(View);
+  
+}});
+
+window.require.define({"views/notepad_view": function(exports, require, module) {
+  var NotepadView, View, app, template,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  View = require('./view');
+
+  app = require('application');
+
+  template = require('./templates/notepad');
+
+  module.exports = NotepadView = (function(_super) {
+
+    __extends(NotepadView, _super);
+
+    function NotepadView() {
+      this.updateContent = __bind(this.updateContent, this);
+
+      this.afterRender = __bind(this.afterRender, this);
+
+      this.showNoteContent = __bind(this.showNoteContent, this);
+
+      this.initialize = __bind(this.initialize, this);
+      return NotepadView.__super__.constructor.apply(this, arguments);
+    }
+
+    NotepadView.prototype.template = template;
+
+    NotepadView.prototype.currentNote = null;
+
+    NotepadView.prototype.initialize = function() {
+      return app.notes.bind('sync', this.showNoteContent);
+    };
+
+    NotepadView.prototype.showNoteContent = function(note, notes) {
+      this.currentNote = note;
+      return this.$('#note-input').text(note.attributes.content);
+    };
+
+    NotepadView.prototype.afterRender = function() {
+      return this.$('#note-input').bind('blur', this.updateContent);
+    };
+
+    NotepadView.prototype.updateContent = function() {
+      if (this.currentNote) {
+        return this.currentNote.save({
+          content: this.$('#note-input').text()
+        });
+      }
+    };
+
+    return NotepadView;
+
+  })(View);
   
 }});
 
@@ -154,7 +391,7 @@ window.require.define({"views/templates/home": function(exports, require, module
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div id="content"><h1>Brunch<img src="http://brunch.io/images/brunch.png"/></h1><h2>Welcome!</h2><ul><li><a href="http://brunch.readthedocs.org/">Documentation</a></li><li><a href="https://github.com/brunch/brunch/issues">Github Issues</a></li><li><a href="https://github.com/brunch/twitter">Twitter Example App</a></li><li><a href="https://github.com/brunch/todos">Todos Example App</a></li></ul></div>');
+  buf.push('<div class="row-fluid fullheight"><aside id="notes-list" class="span3"></aside><section id="note-editor" class="span9"></section></div>');
   }
   return buf.join("");
   };
@@ -178,10 +415,55 @@ window.require.define({"views/templates/layout": function(exports, require, modu
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>UI</title><link rel="stylesheet" href="/stylesheets/app.css"></head><body>');
+  buf.push('<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>Brunch Notes</title><link rel="stylesheet" href="/stylesheets/app.css"></head><body>');
   var __val__ = body
   buf.push(null == __val__ ? "" : __val__);
   buf.push('<script src="/javascripts/vendor.js"></script><script src="/javascripts/app.js"></script></body></html>');
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/new_note": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/note": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/note_list": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/notepad": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<div id="note-input" contenteditable="true" class="notepad"></div>');
   }
   return buf.join("");
   };
