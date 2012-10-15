@@ -79,17 +79,64 @@ window.require.define({"test/models/note": function(exports, require, module) {
 
   Note = require('models/note');
 
-  describe('Note', function() {
-    return beforeEach(function() {
+  buster.spec.expose();
+
+  describe('[app.models.Note]', function() {
+    beforeEach(function() {
       return this.model = new Note();
+    });
+    afterEach(function() {
+      return this.model = null;
+    });
+    return it('should have defaults', function() {
+      expect(this.model.attributes.title).toBe('Click to edit');
+      expect(this.model.attributes.content).toBe('');
+      return expect(this.model.attributes.current).toBe(false);
     });
   });
   
 }});
 
-window.require.define({"test/models/notes_test": function(exports, require, module) {
-  
+window.require.define({"test/models/notes": function(exports, require, module) {
+  var Notes, app;
 
+  Notes = require('models/notes');
+
+  app = require('application');
+
+  buster.spec.expose();
+
+  describe('[app.models.notes]', function() {
+    beforeEach(function() {
+      app.initialize();
+      return this.notes = app.notes;
+    });
+    afterEach(function() {
+      return localStorage.clear();
+    });
+    it('should check for initialized localStorage', function() {
+      return expect(typeof this.notes.localStorage).toBe('object');
+    });
+    return it('should set a note to be current', function() {
+      this.notes.create({
+        title: 'TITLE',
+        content: 'CONTENT'
+      });
+      this.notes.create({
+        title: 'TITLE2',
+        content: 'CONTENT2'
+      });
+      expect(this.notes.models.length).toBe(2);
+      expect(this.notes.models[0].attributes.current).toBe(false);
+      expect(this.notes.models[1].attributes.current).toBe(false);
+      this.notes.setCurrent(this.notes.models[0]);
+      expect(this.notes.models[0].attributes.current).toBe(true);
+      expect(this.notes.models[1].attributes.current).toBe(false);
+      this.notes.setCurrent(this.notes.models[1]);
+      expect(this.notes.models[0].attributes.current).toBe(false);
+      return expect(this.notes.models[1].attributes.current).toBe(true);
+    });
+  });
   
 }});
 
@@ -151,4 +198,4 @@ window.require.define({"test/views/notepad_view": function(exports, require, mod
   
 }});
 
-window.require('test/models/notes_test');
+

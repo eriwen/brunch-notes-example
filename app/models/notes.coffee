@@ -6,3 +6,4 @@ module.exports = class Notes extends Collection
   model: Note
 
   initialize: =>
+    @localStorage = new Store 'notes'

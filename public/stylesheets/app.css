@@ -4142,8 +4142,15 @@ body {
     right: 0; }
 
 #notes-list {
+  position: relative;
   height: 100%; }
   #notes-list > div {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0; }
+  #notes-list ul {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -4157,4 +4164,4 @@ body {
     height: 100%; }
   #note-editor #note-input {
     height: 100%;
-    width: 100; }
+    width: 100%; }

@@ -133,7 +133,8 @@ window.require.define({"lib/router": function(exports, require, module) {
     };
 
     Router.prototype.home = function() {
-      return app.homeView.render();
+      app.homeView.render();
+      return app.notes.fetch();
     };
 
     return Router;
@@ -211,7 +212,9 @@ window.require.define({"models/notes": function(exports, require, module) {
 
     Notes.prototype.model = Note;
 
-    Notes.prototype.initialize = function() {};
+    Notes.prototype.initialize = function() {
+      return this.localStorage = new Store('notes');
+    };
 
     return Notes;
 
@@ -243,7 +246,8 @@ window.require.define({"views/home_view": function(exports, require, module) {
     HomeView.prototype.template = template;
 
     HomeView.prototype.afterRender = function() {
-      return this.$el.find('#note-editor').append(app.notepadView.render().el);
+      this.$el.find('#note-editor').append(app.notepadView.render().el);
+      return this.$el.find('#notes-list').append(app.noteListView.render().el);
     };
 
     return HomeView;
@@ -253,11 +257,14 @@ window.require.define({"views/home_view": function(exports, require, module) {
 }});
 
 window.require.define({"views/new_note_view": function(exports, require, module) {
-  var NewNoteView, View, template,
+  var NewNoteView, View, app, template,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   View = require('./view');
+
+  app = require('application');
 
   template = require('./templates/new_note');
 
@@ -266,10 +273,21 @@ window.require.define({"views/new_note_view": function(exports, require, module)
     __extends(NewNoteView, _super);
 
     function NewNoteView() {
+      this.createNewNote = __bind(this.createNewNote, this);
       return NewNoteView.__super__.constructor.apply(this, arguments);
     }
 
     NewNoteView.prototype.template = template;
+
+    NewNoteView.prototype.id = 'add-note-view';
+
+    NewNoteView.prototype.events = {
+      'click #add-note': 'createNewNote'
+    };
+
+    NewNoteView.prototype.createNewNote = function() {
+      return app.notes.create();
+    };
 
     return NewNoteView;
 
@@ -278,36 +296,75 @@ window.require.define({"views/new_note_view": function(exports, require, module)
 }});
 
 window.require.define({"views/note_list_view": function(exports, require, module) {
-  var NoteListView, View, template,
+  var NoteView, NotesView, View, app, template,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   View = require('./view');
 
+  NoteView = require('./note_view');
+
+  app = require('application');
+
   template = require('./templates/note_list');
 
-  module.exports = NoteListView = (function(_super) {
+  module.exports = NotesView = (function(_super) {
 
-    __extends(NoteListView, _super);
+    __extends(NotesView, _super);
 
-    function NoteListView() {
-      return NoteListView.__super__.constructor.apply(this, arguments);
+    function NotesView() {
+      this.afterRender = __bind(this.afterRender, this);
+
+      this.initialize = __bind(this.initialize, this);
+
+      this.addAll = __bind(this.addAll, this);
+
+      this.addOne = __bind(this.addOne, this);
+      return NotesView.__super__.constructor.apply(this, arguments);
     }
 
-    NoteListView.prototype.template = template;
+    NotesView.prototype.template = template;
 
-    return NoteListView;
+    NotesView.prototype.addOne = function(note) {
+      var view;
+      view = new NoteView({
+        model: note
+      });
+      this.$el.find('#add-note').before(view.render().el);
+      if (note.attributes.current) {
+        return view.$el.find('.note').click();
+      }
+    };
+
+    NotesView.prototype.addAll = function() {
+      return app.notes.each(this.addOne);
+    };
+
+    NotesView.prototype.initialize = function() {
+      app.notes.bind('add', this.addOne);
+      return app.notes.bind('reset', this.addAll);
+    };
+
+    NotesView.prototype.afterRender = function() {
+      return this.$el.find('ul').append(app.newNoteView.render().el);
+    };
+
+    return NotesView;
 
   })(View);
   
 }});
 
 window.require.define({"views/note_view": function(exports, require, module) {
-  var NoteView, View, template,
+  var NoteView, View, app, template,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   View = require('./view');
+
+  app = require('application');
 
   template = require('./templates/note');
 
@@ -316,10 +373,58 @@ window.require.define({"views/note_view": function(exports, require, module) {
     __extends(NoteView, _super);
 
     function NoteView() {
+      this.clear = __bind(this.clear, this);
+
+      this.remove = __bind(this.remove, this);
+
+      this.updateTitle = __bind(this.updateTitle, this);
+
+      this.getRenderData = __bind(this.getRenderData, this);
+
+      this.afterRender = __bind(this.afterRender, this);
+
+      this.initialize = __bind(this.initialize, this);
       return NoteView.__super__.constructor.apply(this, arguments);
     }
 
     NoteView.prototype.template = template;
+
+    NoteView.prototype.tagName = 'li';
+
+    NoteView.prototype.initialize = function() {
+      this.model.bind('change', this.render);
+      return this.model.view = this;
+    };
+
+    NoteView.prototype.afterRender = function() {
+      var noteTitle;
+      noteTitle = this.$el.find('.note');
+      if (this.model.attributes.current) {
+        noteTitle.focus();
+      }
+      noteTitle.bind('blur', this.updateTitle);
+      return noteTitle.bind('keyup', this.updateTitleOnEnter);
+    };
+
+    NoteView.prototype.getRenderData = function() {
+      return {
+        note: this.model.toJSON()
+      };
+    };
+
+    NoteView.prototype.updateTitle = function(event) {
+      return this.model.save({
+        title: this.$(event.target).text()
+      });
+    };
+
+    NoteView.prototype.remove = function() {
+      return this.$el.remove();
+    };
+
+    NoteView.prototype.clear = function() {
+      return this.model.clear();
+    };
 
     return NoteView;
 
@@ -430,6 +535,7 @@ window.require.define({"views/templates/new_note": function(exports, require, mo
   var buf = [];
   with (locals || {}) {
   var interp;
+  buf.push('<li id="add-note">New Note</li>');
   }
   return buf.join("");
   };
@@ -441,6 +547,7 @@ window.require.define({"views/templates/note": function(exports, require, module
   var buf = [];
   with (locals || {}) {
   var interp;
+  buf.push('<div contenteditable="true" class="note">' + escape((interp = note.title) == null ? '' : interp) + '</div>');
   }
   return buf.join("");
   };
@@ -452,6 +559,7 @@ window.require.define({"views/templates/note_list": function(exports, require, m
   var buf = [];
   with (locals || {}) {
   var interp;
+  buf.push('<ul class="fullheight"></ul>');
   }
   return buf.join("");
   };

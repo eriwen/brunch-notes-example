@@ -11872,206 +11872,133 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 ;
 
 /**
- * |-------------------|
- * | Backbone-Mediator |
- * |-------------------|
- *  Backbone-Mediator is freely distributable under the MIT license.
- *
- *  <a href="https://github.com/chalbert/Backbone-Mediator">More details & documentation</a>
- *
- * @author Nicolas Gilbert
- *
- * @requires _
- * @requires Backbone
+ * Backbone localStorage Adapter
+ * https://github.com/jeromegn/Backbone.localStorage
  */
-(function(factory){
-  'use strict';
 
-  if (typeof define === 'function' && define.amd) {
-    define(['underscore', 'backbone'], factory);
-  } else {
-    factory(_, Backbone);
+(function() {
+// A simple module to replace `Backbone.sync` with *localStorage*-based
+// persistence. Models are given GUIDS, and saved into a JSON object. Simple
+// as that.
+
+// Generate four random hex digits.
+function S4() {
+   return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+};
+
+// Generate a pseudo-GUID by concatenating random hexadecimal.
+function guid() {
+   return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+};
+
+// Our Store is represented by a single JS object in *localStorage*. Create it
+// with a meaningful name, like the name you'd give a table.
+// window.Store is deprectated, use Backbone.LocalStorage instead
+Backbone.LocalStorage = window.Store = function(name) {
+  this.name = name;
+  var store = this.localStorage().getItem(this.name);
+  this.records = (store && store.split(",")) || [];
+};
+
+_.extend(Backbone.LocalStorage.prototype, {
+
+  // Save the current state of the **Store** to *localStorage*.
+  save: function() {
+    this.localStorage().setItem(this.name, this.records.join(","));
+  },
+
+  // Add a model, giving it a (hopefully)-unique GUID, if it doesn't already
+  // have an id of it's own.
+  create: function(model) {
+    if (!model.id) model.id = model.attributes[model.idAttribute] = guid();
+    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    this.records.push(model.id.toString());
+    this.save();
+    return model;
+  },
+
+  // Update a model by replacing its copy in `this.data`.
+  update: function(model) {
+    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    if (!_.include(this.records, model.id.toString())) this.records.push(model.id.toString()); this.save();
+    return model;
+  },
+
+  // Retrieve a model from `this.data` by id.
+  find: function(model) {
+    return JSON.parse(this.localStorage().getItem(this.name+"-"+model.id));
+  },
+
+  // Return the array of all models currently in storage.
+  findAll: function() {
+    return _(this.records).chain()
+        .map(function(id){return JSON.parse(this.localStorage().getItem(this.name+"-"+id));}, this)
+        .compact()
+        .value();
+  },
+
+  // Delete a model from `this.data`, returning it.
+  destroy: function(model) {
+    this.localStorage().removeItem(this.name+"-"+model.id);
+    this.records = _.reject(this.records, function(record_id){return record_id == model.id.toString();});
+    this.save();
+    return model;
+  },
+
+  localStorage: function() {
+      return localStorage;
   }
 
-})(function (_, Backbone){
-  'use strict';
+});
 
-  /**
-   * @static
-   */
-  var channels = {},
-      Subscriber,
-      /** @borrows Backbone.View#delegateEvents */
-      delegateEvents = Backbone.View.prototype.delegateEvents,
-      /** @borrows Backbone.View#delegateEvents */
-      undelegateEvents = Backbone.View.prototype.undelegateEvents;
+// localSync delegate to the model or collection's
+// *localStorage* property, which should be an instance of `Store`.
+// window.Store.sync and Backbone.localSync is deprectated, use Backbone.LocalStorage.sync instead
+Backbone.LocalStorage.sync = window.Store.sync = Backbone.localSync = function(method, model, options, error) {
+  var store = model.localStorage || model.collection.localStorage;
 
-  /**
-   * @class
-   */
-  Backbone.Mediator = {
+  // Backwards compatibility with Backbone <= 0.3.3
+  if (typeof options == 'function') {
+    options = {
+      success: options,
+      error: error
+    };
+  }
 
-    /**
-     * Subscribe to a channel
-     *
-     * @param channel
-     */
-    subscribe: function(channel, subscription, context, once) {
-      if (!channels[channel]) channels[channel] = [];
-      channels[channel].push({fn: subscription, context: context || this, once: once});
-    },
+  var resp;
 
-    /**
-     * Trigger all callbacks for a channel
-     *
-     * @param channel
-     * @params N Extra parametter to pass to handler
-     */
-    publish: function(channel) {
-      if (!channels[channel]) return;
+  switch (method) {
+    case "read":    resp = model.id != undefined ? store.find(model) : store.findAll(); break;
+    case "create":  resp = store.create(model);                            break;
+    case "update":  resp = store.update(model);                            break;
+    case "delete":  resp = store.destroy(model);                           break;
+  }
 
-      var args = [].slice.call(arguments, 1),
-          subscription;
+  if (resp) {
+    options.success(resp);
+  } else {
+    options.error("Record not found");
+  }
+};
 
-      for (var i = 0; i < channels[channel].length; i++) {
-        subscription = channels[channel][i];
-        subscription.fn.apply(subscription.context, args);
-        if (subscription.once) {
-          Backbone.Mediator.unsubscribe(channel, subscription.fn, subscription.context);
-          i--;
-        }
-      }
-    },
+Backbone.ajaxSync = Backbone.sync;
 
-    /**
-     * Cancel subscription
-     *
-     * @param channel
-     * @param fn
-     * @param context
-     */
+Backbone.getSyncMethod = function(model) {
+	if(model.localStorage || (model.collection && model.collection.localStorage))
+	{
+		return Backbone.localSync;
+	}
 
-    unsubscribe: function(channel, fn, context){
-      if (!channels[channel]) return;
+	return Backbone.ajaxSync;
+};
 
-      var subscription;
-      for (var i = 0; i < channels[channel].length; i++) {
-        subscription = channels[channel][i];
-        if (subscription.fn === fn && subscription.context === context) {
-          channels[channel].splice(i, 1);
-          i--;
-        }
-      }
-    },
+// Override 'Backbone.sync' to default to localSync,
+// the original 'Backbone.sync' is still available in 'Backbone.ajaxSync'
+Backbone.sync = function(method, model, options, error) {
+	Backbone.getSyncMethod(model).apply(this, [method, model, options, error]);
+};
 
-    /**
-     * Subscribing to one event only
-     *
-     * @param channel
-     * @param subscription
-     * @param context
-     */
-    subscribeOnce: function (channel, subscription, context) {
-      Backbone.Mediator.subscribe(channel, subscription, context, true);
-    }
-
-  };
-
-  /**
-   * Allow to define convention-based subscriptions
-   * as an 'subscriptions' hash on a view. Subscriptions
-   * can then be easily setup and cleaned.
-   *
-   * @class
-   */
-
-
-  Subscriber = {
-
-    /**
-     * Extend delegateEvents() to set subscriptions
-     */
-    delegateEvents: function(){
-      delegateEvents.apply(this, arguments);
-      this.setSubscriptions();
-    },
-
-    /**
-     * Extend undelegateEvents() to unset subscriptions
-     */
-    undelegateEvents: function(){
-      undelegateEvents.apply(this, arguments);
-      this.unsetSubscriptions();
-    },
-
-    /** @property {Object} List of subscriptions, to be defined */
-    subscriptions: {},
-
-    /**
-     * Subscribe to each subscription
-     * @param {Object} [subscriptions] An optional hash of subscription to add
-     */
-
-    setSubscriptions: function(subscriptions){
-      if (subscriptions) _.extend(this.subscriptions || {}, subscriptions);
-      subscriptions = subscriptions || this.subscriptions;
-      if (!subscriptions || _.isEmpty(subscriptions)) return;
-      // Just to be sure we don't set duplicate
-      this.unsetSubscriptions(subscriptions);
-
-      _.each(subscriptions, function(subscription, channel){
-        var once;
-        if (subscription.$once) {
-          subscription = subscription.$once;
-          once = true;
-        }
-        if (_.isString(subscription)) {
-          subscription = this[subscription];
-        }
-        Backbone.Mediator.subscribe(channel, subscription, this, once);
-      }, this);
-    },
-
-    /**
-     * Unsubscribe to each subscription
-     * @param {Object} [subscriptions] An optional hash of subscription to remove
-     */
-    unsetSubscriptions: function(subscriptions){
-      subscriptions = subscriptions || this.subscriptions;
-      if (!subscriptions || _.isEmpty(subscriptions)) return;
-      _.each(subscriptions, function(subscription, channel){
-        if (_.isString(subscription)) {
-          subscription = this[subscription];
-        }
-        Backbone.Mediator.unsubscribe(channel, subscription.$once || subscription, this);
-      }, this);
-    }
-  };
-
-  /**
-   * @lends Backbone.View.prototype
-   */
-  _.extend(Backbone.View.prototype, Subscriber);
-
-  /**
-   * @lends Backbone.Mediator
-   */
-  _.extend(Backbone.Mediator, {
-    /**
-     * Shortcut for publish
-     * @function
-     */
-    pub: Backbone.Mediator.publish,
-    /**
-     * Shortcut for subscribe
-     * @function
-     */
-    sub: Backbone.Mediator.subscribe
-  });
-
-  return Backbone;
-
-});;
+})();;
 
 /* ===================================================
  * bootstrap-transition.js v2.0.4
@@ -13920,6 +13847,48 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
   })
 
 }(window.jQuery);;
+
+(function() {
+  var WebSocket = window.WebSocket || window.MozWebSocket;
+  var br = window.brunch;
+  if (!WebSocket || !br || !br['auto-reload'] || !br['auto-reload'].enabled) return;
+
+  var cacheBuster = function(url){
+    var date = Math.round(Date.now() / 1000).toString();
+    url = url.replace(/(\&|\\?)cacheBuster=\d*/, '');
+    return url + (url.indexOf('?') >= 0 ? '&' : '?') +'cacheBuster=' + date;
+  };
+
+  var reloaders = {
+    page: function(){
+      window.location.reload(true);
+    },
+
+    stylesheet: function(){
+      [].slice
+        .call(document.querySelectorAll('link[rel="stylesheet"]'))
+        .filter(function(link){
+          return (link != null && link.href != null);
+        })
+        .forEach(function(link) {
+          link.href = cacheBuster(link.href);
+        });
+    }
+  };
+  var host = (!br['server']) ? window.location.hostname : br['server'];
+  var connection = new WebSocket('ws://' + host + ':9485');
+  connection.onmessage = function(event) {
+    var message = event.data;
+    var b = window.brunch;
+    if (!b || !b['auto-reload'] || !b['auto-reload'].enabled) return;
+    if (reloaders[message] != null) {
+      reloaders[message]();
+    } else {
+      reloaders.page();
+    }
+  };
+})();
+;
 
 
 jade = (function(exports){

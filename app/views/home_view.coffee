@@ -8,3 +8,4 @@ module.exports = class HomeView extends View
 
   afterRender: ->
     @$el.find('#note-editor').append app.notepadView.render().el
+    @$el.find('#notes-list').append app.noteListView.render().el

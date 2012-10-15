@@ -1,7 +1,7 @@
 {
-  "author": "Your Name",
-  "name": "package-name",
-  "description": "Package description",
+  "author": "Eric Wendelin",
+  "name": "brunch-notes-example",
+  "description": "Simple notepad app written with Brunch",
   "version": "0.0.1",
   "homepage": "",
   "repository": {
@@ -13,6 +13,7 @@
   },
   "scripts": {
     "start": "brunch watch --server",
+    "server": "./buster-server.sh start",
     "test": "brunch test"
   },
   "dependencies": {
@@ -22,8 +23,12 @@
     "css-brunch": "> 1.0 < 1.5",
     "jade-brunch": "> 1.0 < 1.5",
     "uglify-js-brunch": "> 1.0 < 1.5",
-    "clean-css-brunch": "> 1.0 < 1.5"
+    "clean-css-brunch": "> 1.0 < 1.5",
+    "auto-reload-brunch": "~1.3.2"
   },
   "devDependencies": {
+    "buster": ">= 0.6 < 1.0",
+    "buster-coffee": ">= 0.1.3 < 0.2",
+    "sinon": "1.4.x"
   }
 }

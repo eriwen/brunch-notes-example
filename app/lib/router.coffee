@@ -5,3 +5,4 @@ module.exports = class Router extends Backbone.Router
 
   home: ->
     app.homeView.render()
+    app.notes.fetch()
