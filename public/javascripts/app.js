@@ -419,7 +419,8 @@ window.require.define({"views/note_view": function(exports, require, module) {
     NoteView.prototype.tagName = 'li';
 
     NoteView.prototype.events = {
-      'click .note': 'viewEdit'
+      'click .note': 'viewEdit',
+      'click .delete': 'clear'
     };
 
     NoteView.prototype.initialize = function() {
@@ -601,6 +602,7 @@ window.require.define({"views/templates/note": function(exports, require, module
   {
   buf.push('<div contenteditable="true" class="note">' + escape((interp = note.title) == null ? '' : interp) + '</div>');
   }
+  buf.push('<span class="delete">&cross;</span>');
   }
   return buf.join("");
   };

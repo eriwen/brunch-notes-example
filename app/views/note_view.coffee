@@ -8,6 +8,7 @@ module.exports = class NoteView extends View
 
   events:
     'click .note': 'viewEdit'
+    'click .delete': 'clear'
 
   initialize: =>
     @model.bind 'change', @render

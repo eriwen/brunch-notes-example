@@ -1,16 +1,21 @@
 @import "compass/layout/stretching"
+@import "compass/utilities"
 @import "compass/css3/images"
+
+$border-height: 20px
 
 html, body
   height: 100%
+  font-family: "Marker Felt", sans-serif
 .fullheight
   height: 100%
 .fullwidth
   width: 100%
 body
+  border-top: $border-height solid #8b4513
   overflow: hidden
   > .container-fluid
-    +stretch
+    +stretch($border-height)
 #notes-list
   font-size: 1.5em
   position: relative
@@ -26,13 +31,25 @@ body
     border: 1px dotted #DDD
     border-width: 1px 0
     position: relative
+    .delete
+      color: red
+      cursor: pointer
+      font-size: 1.3em
+      position: absolute
+      top: 20px
+      right: 10px
   .note
     padding: 20px 10px
   .current
-    +background-image(linear-gradient(left, lightblue 50%, white 100%))
+    +background-image(linear-gradient(left, lightgreen 50%, white 100%))
   #add-note
+    color: #999
+    cursor: pointer
     padding: 20px 10px
 #note-editor
+  background-color: #fff
+  background-image: -webkit-linear-gradient(0deg, transparent 79px, #c00 79px, #abced4 81px, transparent 81px), -webkit-linear-gradient(#ccc .1em, transparent .1em)
+  background-size: 100% 1.9em
   border-left: 1px solid #ccc
   height: 100%
   position: relative
@@ -40,5 +57,7 @@ body
   > div
     height: 100%
   #note-input
-    font-size: 1.8em
+    font: 1.8em "Marker Felt" normal
+    padding-left: 85px
+    padding-top: 1.1em
     +stretch

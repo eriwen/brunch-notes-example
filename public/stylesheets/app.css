@@ -4124,7 +4124,8 @@ a.label:hover, a.badge:hover {
     height: auto !important;
     overflow: visible !important; } }
 html, body {
-  height: 100%; }
+  height: 100%;
+  font-family: "Marker Felt", sans-serif; }
 
 .fullheight {
   height: 100%; }
@@ -4133,10 +4134,11 @@ html, body {
   width: 100%; }
 
 body {
+  border-top: 20px solid saddlebrown;
   overflow: hidden; }
   body > .container-fluid {
     position: absolute;
-    top: 0;
+    top: 20px;
     bottom: 0;
     left: 0;
     right: 0; }
@@ -4164,18 +4166,30 @@ body {
     border: 1px dotted #dddddd;
     border-width: 1px 0;
     position: relative; }
+    #notes-list li .delete {
+      color: red;
+      cursor: pointer;
+      font-size: 1.3em;
+      position: absolute;
+      top: 20px;
+      right: 10px; }
   #notes-list .note {
     padding: 20px 10px; }
   #notes-list .current {
-    background-image: -webkit-gradient(linear, 0% 50%, 100% 50%, color-stop(50%, #add8e6), color-stop(100%, #ffffff));
-    background-image: -webkit-linear-gradient(left, #add8e6 50%, #ffffff 100%);
-    background-image: -moz-linear-gradient(left, #add8e6 50%, #ffffff 100%);
-    background-image: -o-linear-gradient(left, #add8e6 50%, #ffffff 100%);
-    background-image: linear-gradient(left, #add8e6 50%, #ffffff 100%); }
+    background-image: -webkit-gradient(linear, 0% 50%, 100% 50%, color-stop(50%, #90ee90), color-stop(100%, #ffffff));
+    background-image: -webkit-linear-gradient(left, #90ee90 50%, #ffffff 100%);
+    background-image: -moz-linear-gradient(left, #90ee90 50%, #ffffff 100%);
+    background-image: -o-linear-gradient(left, #90ee90 50%, #ffffff 100%);
+    background-image: linear-gradient(left, #90ee90 50%, #ffffff 100%); }
   #notes-list #add-note {
+    color: #999999;
+    cursor: pointer;
     padding: 20px 10px; }
 
 #note-editor {
+  background-color: white;
+  background-image: -webkit-linear-gradient(0deg, transparent 79px, #cc0000 79px, #abced4 81px, transparent 81px), -webkit-linear-gradient(#cccccc 0.1em, transparent 0.1em);
+  background-size: 100% 1.9em;
   border-left: 1px solid #cccccc;
   height: 100%;
   position: relative;
@@ -4183,7 +4197,9 @@ body {
   #note-editor > div {
     height: 100%; }
   #note-editor #note-input {
-    font-size: 1.8em;
+    font: 1.8em "Marker Felt" normal;
+    padding-left: 85px;
+    padding-top: 1.1em;
     position: absolute;
     top: 0;
     bottom: 0;
