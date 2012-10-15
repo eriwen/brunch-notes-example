@@ -1,1 +1,4 @@
-.note(contenteditable="true") #{note.title}
+if note.current
+    .note.current(contenteditable="true") #{note.title}
+else
+    .note(contenteditable="true") #{note.title}

@@ -1,4 +1,5 @@
 @import "compass/layout/stretching"
+@import "compass/css3/images"
 
 html, body
   height: 100%
@@ -11,18 +12,33 @@ body
   > .container-fluid
     +stretch
 #notes-list
+  font-size: 1.5em
   position: relative
   height: 100%
   > div
     +stretch
   ul
+    border: 1px solid #CCC
+    border-width: 0 1px
+    list-style-type: none
     +stretch
-
+  li
+    border: 1px dotted #DDD
+    border-width: 1px 0
+    position: relative
+  .note
+    padding: 20px 10px
+  .current
+    +background-image(linear-gradient(left, lightblue 50%, white 100%))
+  #add-note
+    padding: 20px 10px
 #note-editor
   border-left: 1px solid #ccc
   height: 100%
+  position: relative
+  white-space: pre
   > div
     height: 100%
   #note-input
-    height: 100%
-    width: 100%
+    font-size: 1.8em
+    +stretch

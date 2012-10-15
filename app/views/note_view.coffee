@@ -6,6 +6,9 @@ module.exports = class NoteView extends View
   template: template
   tagName: 'li'
 
+  events:
+    'click .note': 'viewEdit'
+
   initialize: =>
     @model.bind 'change', @render
     @model.view = this
@@ -19,8 +22,17 @@ module.exports = class NoteView extends View
   getRenderData: =>
     {note: @model.toJSON()}
 
+  viewEdit: =>
+    app.notes.setCurrent @model
+
   updateTitle: (event) =>
     @model.save title: @$(event.target).text()
+
+  updateTitleOnEnter: (event) =>
+    noteTitle = @$(event.target)
+    if event.keyCode is 13
+      @model.save(title: noteTitle.text())
+      noteTitle.blur()
 
   remove: =>
     @$el.remove()

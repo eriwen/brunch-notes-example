@@ -4142,6 +4142,7 @@ body {
     right: 0; }
 
 #notes-list {
+  font-size: 1.5em;
   position: relative;
   height: 100%; }
   #notes-list > div {
@@ -4151,17 +4152,40 @@ body {
     left: 0;
     right: 0; }
   #notes-list ul {
+    border: 1px solid #cccccc;
+    border-width: 0 1px;
+    list-style-type: none;
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0; }
+  #notes-list li {
+    border: 1px dotted #dddddd;
+    border-width: 1px 0;
+    position: relative; }
+  #notes-list .note {
+    padding: 20px 10px; }
+  #notes-list .current {
+    background-image: -webkit-gradient(linear, 0% 50%, 100% 50%, color-stop(50%, #add8e6), color-stop(100%, #ffffff));
+    background-image: -webkit-linear-gradient(left, #add8e6 50%, #ffffff 100%);
+    background-image: -moz-linear-gradient(left, #add8e6 50%, #ffffff 100%);
+    background-image: -o-linear-gradient(left, #add8e6 50%, #ffffff 100%);
+    background-image: linear-gradient(left, #add8e6 50%, #ffffff 100%); }
+  #notes-list #add-note {
+    padding: 20px 10px; }
 
 #note-editor {
   border-left: 1px solid #cccccc;
-  height: 100%; }
+  height: 100%;
+  position: relative;
+  white-space: pre; }
   #note-editor > div {
     height: 100%; }
   #note-editor #note-input {
-    height: 100%;
-    width: 100%; }
+    font-size: 1.8em;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0; }

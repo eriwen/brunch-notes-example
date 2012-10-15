@@ -168,19 +168,27 @@ window.require.define({"models/note": function(exports, require, module) {
     __extends(Note, _super);
 
     function Note() {
+      this.setCurrent = __bind(this.setCurrent, this);
+
       this.clear = __bind(this.clear, this);
       return Note.__super__.constructor.apply(this, arguments);
     }
 
     Note.prototype.defaults = {
       title: 'Click to edit',
-      content: '',
+      content: 'Note content',
       current: false
     };
 
     Note.prototype.clear = function() {
       this.destroy();
       return this.view.remove();
+    };
+
+    Note.prototype.setCurrent = function(bool) {
+      return this.save({
+        current: bool
+      });
     };
 
     return Note;
@@ -206,6 +214,8 @@ window.require.define({"models/notes": function(exports, require, module) {
     __extends(Notes, _super);
 
     function Notes() {
+      this.setCurrent = __bind(this.setCurrent, this);
+
       this.initialize = __bind(this.initialize, this);
       return Notes.__super__.constructor.apply(this, arguments);
     }
@@ -214,6 +224,19 @@ window.require.define({"models/notes": function(exports, require, module) {
 
     Notes.prototype.initialize = function() {
       return this.localStorage = new Store('notes');
+    };
+
+    Notes.prototype.setCurrent = function(note) {
+      app.notes.map(function(n) {
+        if (n !== note) {
+          return n.setCurrent(false);
+        }
+      });
+      return note.save({
+        current: true
+      }, {
+        silent: true
+      });
     };
 
     return Notes;
@@ -377,7 +400,11 @@ window.require.define({"views/note_view": function(exports, require, module) {
 
       this.remove = __bind(this.remove, this);
 
+      this.updateTitleOnEnter = __bind(this.updateTitleOnEnter, this);
+
       this.updateTitle = __bind(this.updateTitle, this);
+
+      this.viewEdit = __bind(this.viewEdit, this);
 
       this.getRenderData = __bind(this.getRenderData, this);
 
@@ -390,6 +417,10 @@ window.require.define({"views/note_view": function(exports, require, module) {
     NoteView.prototype.template = template;
 
     NoteView.prototype.tagName = 'li';
+
+    NoteView.prototype.events = {
+      'click .note': 'viewEdit'
+    };
 
     NoteView.prototype.initialize = function() {
       this.model.bind('change', this.render);
@@ -412,10 +443,25 @@ window.require.define({"views/note_view": function(exports, require, module) {
       };
     };
 
+    NoteView.prototype.viewEdit = function() {
+      return app.notes.setCurrent(this.model);
+    };
+
     NoteView.prototype.updateTitle = function(event) {
       return this.model.save({
         title: this.$(event.target).text()
       });
+    };
+
+    NoteView.prototype.updateTitleOnEnter = function(event) {
+      var noteTitle;
+      noteTitle = this.$(event.target);
+      if (event.keyCode === 13) {
+        this.model.save({
+          title: noteTitle.text()
+        });
+        return noteTitle.blur();
+      }
     };
 
     NoteView.prototype.remove = function() {
@@ -547,7 +593,14 @@ window.require.define({"views/templates/note": function(exports, require, module
   var buf = [];
   with (locals || {}) {
   var interp;
+  if ( note.current)
+  {
+  buf.push('<div contenteditable="true" class="note current">' + escape((interp = note.title) == null ? '' : interp) + '</div>');
+  }
+  else
+  {
   buf.push('<div contenteditable="true" class="note">' + escape((interp = note.title) == null ? '' : interp) + '</div>');
+  }
   }
   return buf.join("");
   };
