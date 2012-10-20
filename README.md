@@ -6,6 +6,9 @@ You can run it quickly:
 # Install Brunch
 npm install brunch -g
 
+# Install Compass if you don't have it
+gem install compass
+
 # Clone the project
 git clone git://github.com/eriwen/brunch-notes-example/
 
