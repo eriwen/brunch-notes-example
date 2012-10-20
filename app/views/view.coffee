@@ -1,4 +1,4 @@
-module.exports = Backbone.View.extend(
+module.exports = class View extends Backbone.View
   initialize: =>
     @render = _.bind(@render, this)
 
@@ -12,4 +12,4 @@ module.exports = Backbone.View.extend(
     this
 
   afterRender: =>
-)
+

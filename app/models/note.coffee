@@ -6,6 +6,8 @@ module.exports = class Note extends Model
     content: 'Note content'
     current: no
 
+  url: =>
+
   clear: =>
     @destroy()
     @view.remove()

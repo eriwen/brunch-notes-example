@@ -4,6 +4,7 @@ Note = require 'models/note'
 
 module.exports = class Notes extends Collection
   model: Note
+  url: =>
 
   initialize: =>
     @localStorage = new Store 'notes'
